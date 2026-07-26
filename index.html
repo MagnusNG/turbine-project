@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grid-Tie Power System &mdash; WEGEN 10kW VAWT | ECE 499</title>
+<style>
+  @font-face { font-family: 'Space Grotesk'; font-weight: 400; src: url('assets/fonts/space-grotesk-400.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Space Grotesk'; font-weight: 500; src: url('assets/fonts/space-grotesk-500.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Space Grotesk'; font-weight: 600; src: url('assets/fonts/space-grotesk-600.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Space Grotesk'; font-weight: 700; src: url('assets/fonts/space-grotesk-700.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Inter'; font-weight: 400; src: url('assets/fonts/inter-400.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Inter'; font-weight: 500; src: url('assets/fonts/inter-500.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Inter'; font-weight: 600; src: url('assets/fonts/inter-600.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'Inter'; font-weight: 700; src: url('assets/fonts/inter-700.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'IBM Plex Mono'; font-weight: 400; src: url('assets/fonts/ibm-plex-mono-400.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'IBM Plex Mono'; font-weight: 500; src: url('assets/fonts/ibm-plex-mono-500.woff2') format('woff2'); font-display: swap; }
+  @font-face { font-family: 'IBM Plex Mono'; font-weight: 600; src: url('assets/fonts/ibm-plex-mono-600.woff2') format('woff2'); font-display: swap; }
+  :root{
+    --bg-dark: #0E2A36;
+    --bg-darker: #0A1F29;
+    --teal-mid: #1C7293;
+    --amber: #FFB703;
+    --amber-dim: #E8A400;
+    --light-bg: #F4F8FA;
+    --ink: #10202A;
+    --paper: #FFFFFF;
+    --muted: #5C7480;
+    --border: #D9E4E8;
+    --display: 'Space Grotesk', 'Segoe UI', Arial, sans-serif;
+    --body: 'Inter', 'Segoe UI', Arial, sans-serif;
+    --mono: 'IBM Plex Mono', 'Consolas', monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+  body {
+    margin: 0; font-family: var(--body); color: var(--ink); background: var(--paper);
+    line-height: 1.6; font-size: 16px;
+  }
+  h1, h2, h3 { font-family: var(--display); margin: 0; letter-spacing: -0.01em; }
+  a { color: inherit; }
+  img { max-width: 100%; display: block; }
+  .mono { font-family: var(--mono); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--amber-dim); margin-bottom: 14px; display: block;
+  }
+  section { padding: 100px 0; }
+  @media (max-width: 720px) { section { padding: 64px 0; } }
+
+  /* ===== NAV ===== */
+  nav {
+    position: sticky; top: 0; z-index: 100; background: rgba(10,31,41,0.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { font-family: var(--display); font-weight: 700; color: #fff; font-size: 17px; text-decoration: none; }
+  .brand span { color: var(--amber); }
+  .navlinks { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; }
+  .navlinks a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 14px; font-weight: 500; transition: color 0.2s; }
+  .navlinks a:hover { color: var(--amber); }
+  .navtoggle { display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; }
+  @media (max-width: 780px) {
+    .navlinks { position: absolute; top: 64px; left: 0; right: 0; background: var(--bg-darker); flex-direction: column; gap: 0; display: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .navlinks.open { display: flex; }
+    .navlinks a { padding: 16px 28px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .navtoggle { display: block; }
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: radial-gradient(ellipse 120% 80% at 70% -10%, #16455A 0%, var(--bg-dark) 55%, var(--bg-darker) 100%);
+    color: #fff; padding: 80px 0 0; overflow: hidden; position: relative;
+  }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 40px; align-items: center; position: relative; }
+  @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } }
+  .hero h1 { font-size: clamp(36px, 5vw, 58px); font-weight: 700; line-height: 1.08; color: #fff; }
+  .hero h1 em { font-style: normal; color: var(--amber); }
+  .hero p.lede { font-size: 18px; color: rgba(255,255,255,0.78); max-width: 46ch; margin: 22px 0 34px; }
+  .stat-strip { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 8px; }
+  .stat { font-family: var(--mono); }
+  .stat .num { font-size: 26px; font-weight: 600; color: var(--amber); display: block; }
+  .stat .lbl { font-size: 12px; color: rgba(255,255,255,0.6); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .turbine-stage { position: relative; display: flex; align-items: center; justify-content: center; padding-bottom: 40px; flex-direction: column; }
+  .turbine-stage::before {
+    content: ""; position: absolute; width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,183,3,0.16) 0%, transparent 70%); pointer-events: none;
+  }
+  .model-viewer { width: min(100%, 480px); aspect-ratio: 1 / 1; cursor: grab; touch-action: none; }
+  .model-viewer:active { cursor: grabbing; }
+  .model-viewer canvas { display: block; width: 100% !important; height: 100% !important; }
+  .drag-hint {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); margin-top: 6px;
+  }
+  .flow-line { position: absolute; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,183,3,0.55), transparent); width: 60%; animation: flow 4.5s ease-in-out infinite; }
+  .flow-line.f1 { top: 30%; left: -10%; animation-delay: 0s; }
+  .flow-line.f2 { top: 55%; left: -10%; animation-delay: 1.5s; }
+  .flow-line.f3 { top: 75%; left: -10%; animation-delay: 3s; }
+  @keyframes flow { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(140%); opacity: 0; } }
+
+  /* ===== SECTION HEADERS ===== */
+  .sec-head { max-width: 640px; margin-bottom: 48px; }
+  .sec-head h2 { font-size: clamp(26px, 3vw, 36px); color: var(--ink); }
+  .sec-head.on-dark h2 { color: #fff; }
+  .sec-head p { color: var(--muted); font-size: 16px; margin-top: 14px; }
+  .sec-head.on-dark p { color: rgba(255,255,255,0.65); }
+
+  /* ===== PROBLEM ===== */
+  .problem { background: var(--light-bg); }
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+  @media (max-width: 860px) { .problem-grid { grid-template-columns: 1fr; } }
+  .problem-grid p { color: var(--ink); font-size: 16.5px; }
+  .problem-grid ul { padding-left: 20px; margin: 20px 0 0; }
+  .problem-grid li { margin-bottom: 12px; color: var(--ink); }
+  .callout {
+    background: var(--paper); border: 1px solid var(--border); border-radius: 10px; padding: 26px 28px;
+  }
+  .callout .k { font-family: var(--mono); font-size: 13px; color: var(--teal-mid); text-transform: uppercase; letter-spacing: 0.08em; }
+  .callout p { margin: 10px 0 0; color: var(--ink); font-size: 15.5px; }
+
+  /* ===== ARCHITECTURE (dark) ===== */
+  .architecture { background: var(--bg-dark); color: #fff; }
+  .arch-figure { background: #F4F8FA; border-radius: 14px; padding: 28px; }
+  .arch-figure img { border-radius: 6px; }
+  .flow-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 18px; margin-top: 40px; }
+  .flow-step { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 18px; }
+  .flow-step .n { font-family: var(--mono); color: var(--amber); font-size: 13px; }
+  .flow-step h3 { font-size: 15.5px; color: #fff; margin-top: 8px; }
+  .flow-step p { font-size: 13.5px; color: rgba(255,255,255,0.65); margin: 6px 0 0; }
+
+  /* ===== DEMO MODEL ===== */
+  .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  @media (max-width: 860px) { .demo-grid { grid-template-columns: 1fr; } }
+  .demo-card { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--paper); }
+  .demo-card .imgwrap { background: var(--light-bg); padding: 24px; }
+  .demo-card .body { padding: 22px 24px 26px; }
+  .demo-card h3 { font-size: 18px; margin-bottom: 8px; }
+  .demo-card p { color: var(--muted); font-size: 14.5px; margin: 0; }
+
+  table.specs { width: 100%; border-collapse: collapse; margin-top: 50px; font-size: 15px; }
+  table.specs th, table.specs td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  table.specs th { font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 500; }
+  table.specs td.val { font-family: var(--mono); color: var(--ink); }
+
+  /* ===== GALLERY / TESTING ===== */
+  .testing { background: var(--light-bg); }
+  .sld-figure {
+    margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 20px; cursor: zoom-in;
+  }
+  .sld-figure img { border-radius: 6px; width: 100%; }
+  .sld-figure figcaption { color: var(--muted); font-size: 13px; margin-top: 12px; font-style: italic; }
+
+  .lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(8,20,26,0.92); z-index: 1000;
+    align-items: center; justify-content: center; padding: 40px; cursor: zoom-out;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  .lightbox-close {
+    position: absolute; top: 24px; right: 32px; background: none; border: none; color: #fff;
+    font-size: 40px; line-height: 1; cursor: pointer; font-family: var(--body);
+  }
+  .subsec-title {
+    font-family: var(--display); font-size: 19px; color: var(--ink); margin: 46px 0 22px;
+  }
+  .photo-gallery { display: grid; grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr; gap: 18px; }
+  .photo-card.wide { grid-row: 1 / 3; }
+  @media (max-width: 780px) { .photo-gallery { grid-template-columns: 1fr; grid-template-rows: auto; } .photo-card.wide { grid-row: auto; } }
+  .photo-card { margin: 0; border-radius: 12px; overflow: hidden; background: #000; position: relative; border: 1px solid var(--border); }
+  .photo-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-card.wide img { aspect-ratio: 4/5; }
+  .photo-card:not(.wide) img { aspect-ratio: 16/10; }
+  .photo-card figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 16px 12px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.72) 0%, transparent 100%);
+    color: #fff; font-size: 13px; font-family: var(--body); font-weight: 500;
+  }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 22px; }
+  .gcard {
+    background: var(--paper); border: 1px dashed #B7C4CA; border-radius: 12px; aspect-ratio: 4/3;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;
+    position: relative;
+  }
+  .gcard .tag {
+    position: absolute; top: 14px; right: 14px; font-family: var(--mono); font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.06em; background: var(--amber); color: var(--ink); padding: 4px 9px; border-radius: 20px; font-weight: 600;
+  }
+  .gcard .lbl { color: var(--muted); font-size: 14.5px; margin-top: 10px; }
+  .gcard .ic { font-size: 30px; opacity: 0.35; }
+
+  /* ===== TIMELINE (dark) ===== */
+  .timeline-sec { background: var(--bg-darker); color: #fff; }
+  .tl { border-left: 2px solid rgba(255,255,255,0.15); margin-left: 6px; padding-left: 32px; display: flex; flex-direction: column; gap: 30px; }
+  .tl-item { position: relative; }
+  .tl-item::before {
+    content: ""; position: absolute; left: -39px; top: 4px; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--bg-darker); border: 2px solid var(--amber);
+  }
+  .tl-item.done::before { background: var(--amber); }
+  .tl-item .date { font-family: var(--mono); font-size: 12.5px; color: var(--amber); text-transform: uppercase; letter-spacing: 0.05em; }
+  .tl-item h3 { font-size: 16.5px; color: #fff; margin: 6px 0 4px; }
+  .tl-item .status { font-family: var(--mono); font-size: 11.5px; color: rgba(255,255,255,0.45); text-transform: uppercase; }
+
+  /* ===== TEAM ===== */
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 24px; }
+  .tcard { border: 1px solid var(--border); border-radius: 12px; padding: 26px 22px; text-align: left; }
+  .tcard .initial {
+    width: 46px; height: 46px; border-radius: 50%; background: var(--bg-dark); color: var(--amber);
+    display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 600; margin-bottom: 16px;
+  }
+  .tcard h3 { font-size: 17px; }
+  .tcard p { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+
+  /* ===== FOOTER ===== */
+  footer { background: var(--bg-darker); color: rgba(255,255,255,0.6); padding: 60px 0 34px; }
+  footer h3 { color: #fff; font-size: 15px; margin-bottom: 14px; font-family: var(--display); }
+  .footer-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 50px; }
+  @media (max-width: 720px) { .footer-grid { grid-template-columns: 1fr; } }
+  footer p, footer li { font-size: 13.5px; line-height: 1.7; }
+  footer ul { padding-left: 0; list-style: none; margin: 0; }
+  footer li { margin-bottom: 10px; color: rgba(255,255,255,0.55); }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px; padding-top: 24px; font-size: 12.5px; color: rgba(255,255,255,0.4); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a href="#top" class="brand">WEGEN <span>Grid-Tie</span></a>
+    <button class="navtoggle" id="navToggle" aria-label="Toggle menu">&#9776;</button>
+    <ul class="navlinks" id="navLinks">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#demo">Demo Model</a></li>
+      <li><a href="#testing">Results</a></li>
+      <li><a href="#timeline">Timeline</a></li>
+      <li><a href="#team">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="flow-line f1"></div>
+  <div class="flow-line f2"></div>
+  <div class="flow-line f3"></div>
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">ECE 499 &middot; Capstone Design Project &middot; University of Victoria</span>
+      <h1>Grid-Tie Power System for a <em>10kW</em> Vertical-Axis Wind Turbine</h1>
+      <p class="lede">Converting WEGEN's variable-voltage, variable-frequency turbine output into stable, grid-ready AC power &mdash; from literature review to a working desktop demonstration.</p>
+      <div class="stat-strip">
+        <div class="stat"><span class="num">10 kW</span><span class="lbl">Rated Power</span></div>
+        <div class="stat"><span class="num">50&ndash;500V</span><span class="lbl">Alternator Range</span></div>
+        <div class="stat"><span class="num">240V / 60Hz</span><span class="lbl">Grid Output</span></div>
+      </div>
+    </div>
+    <div class="turbine-stage">
+      <div id="turbine-3d" class="model-viewer" role="img" aria-label="Interactive 3D model of the WEGEN VAWT assembly. Drag to rotate, scroll to zoom."></div>
+      <span class="drag-hint">Drag to rotate &middot; scroll to zoom</span>
+    </div>
+  </div>
+</header>
+
+<section class="problem" id="problem">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">The Problem</span>
+      <h2>Wind doesn't arrive on a schedule &mdash; grids need power that does.</h2>
+    </div>
+    <div class="problem-grid">
+      <div class="reveal">
+        <p>WEGEN's Vertical-Axis Wind Turbine spins an alternator whose output voltage and frequency shift constantly with wind speed &mdash; anywhere from 50V to 500V AC, three-phase. A home or utility grid can't accept that directly; both expect a steady 240V at 60Hz.</p>
+        <ul>
+          <li>Serves a gap in affordable small-scale wind conversion for rural and off-grid users</li>
+          <li>Displaces fossil-fuel generation, aligned with the EGBC's public and environmental welfare principle</li>
+          <li>Requires power electronics that can regulate, protect, and invert a genuinely unpredictable input</li>
+        </ul>
+      </div>
+      <div class="callout reveal">
+        <span class="k">Design Objectives</span>
+        <p>&bull; Design a 10kW grid-tie system converting alternator output to usable AC power</p>
+        <p>&bull; Produce a single-line diagram (SLD) of the full electrical system</p>
+        <p>&bull; Simulate performance under varying wind and voltage conditions</p>
+        <p>&bull; Estimate prototype cost from a validated components list</p>
+        <p>&bull; Build a reduced-scale demo model to validate the architecture</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="architecture" id="architecture">
+  <div class="wrap">
+    <div class="sec-head on-dark reveal">
+      <span class="eyebrow">System Architecture</span>
+      <h2>Rectify, regulate, then invert.</h2>
+      <p>Informed by a review of small-wind conversion literature (Blaabjerg et al.; Shen &amp; Izadian; Ramos-Paja et al.), this rectifier &rarr; DC bus &rarr; DC/DC &rarr; inverter architecture was selected over a direct AC/AC (matrix converter) design, which lacks a convenient DC bus for battery storage or dump-load protection.</p>
+    </div>
+    <div class="arch-figure reveal">
+      <img src="assets/system_architecture.png" alt="Block diagram of the grid-tie system: VAWT, alternator, diode rectifier, DC bus, DC/DC regulator, grid-tie inverter, with a dump load off the DC bus">
+    </div>
+    <div class="flow-steps reveal">
+      <div class="flow-step"><span class="n">01</span><h3>Diode Rectifier</h3><p>Converts the alternator's variable 3-phase AC to DC. Literature confirms a simple uncontrolled rectifier is sufficient here.</p></div>
+      <div class="flow-step"><span class="n">02</span><h3>Regulated DC Bus</h3><p>A stable node for downstream conversion, with headroom for future battery storage (BESS) integration.</p></div>
+      <div class="flow-step"><span class="n">03</span><h3>DC/DC Regulator</h3><p>Boost or buck stage that irons out the wide voltage swing before inversion.</p></div>
+      <div class="flow-step"><span class="n">04</span><h3>Grid-Tie Inverter</h3><p>Delivers stable 240V, 60Hz AC to a home or the utility grid, with a dump load protecting against excess power.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="demo" id="demo">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Small-Scale Demo Model</span>
+      <h2>Proving the architecture on a desktop.</h2>
+      <p>A hand-built, low-power stand-in for the full 10kW system &mdash; a 3D-printed turbine spun by a desk fan, driving a stepper-motor alternator through the same rectify-regulate architecture at a fraction of the scale.</p>
+    </div>
+    <div class="demo-grid">
+      <div class="demo-card reveal">
+        <div class="imgwrap"><img src="assets/demo_circuit_diagram.png" alt="Block diagram of the small-scale demo circuit"></div>
+        <div class="body">
+          <h3>Demo Circuit</h3>
+          <p>Stepper-motor alternator &rarr; bridge rectifiers &rarr; zener-clamped DC bus &rarr; DC/DC boost &rarr; LED load. A reduced-power analog of the full architecture above.</p>
+        </div>
+      </div>
+      <div class="demo-card reveal">
+        <div class="imgwrap"><img src="assets/savonius_render.png" alt="3D model of the Savonius turbine rotor"></div>
+        <div class="body">
+          <h3>Turbine Rotor &mdash; Savonius Design</h3>
+          <p>Curved-scoop blades were chosen over flat panels for omnidirectional self-starting &mdash; the rotor spins from wind in any direction without needing to face into it.</p>
+        </div>
+      </div>
+    </div>
+    <table class="specs reveal">
+      <tr><th>Parameter</th><th>Value</th></tr>
+      <tr><td>Rated Power</td><td class="val">10 kW</td></tr>
+      <tr><td>Alternator Output Range</td><td class="val">50&ndash;500 V AC, 3-phase, variable frequency</td></tr>
+      <tr><td>Grid-Tie Output</td><td class="val">240 V AC, 60 Hz</td></tr>
+      <tr><td>BESS Compatibility</td><td class="val">Yes, via regulated DC bus</td></tr>
+      <tr><td>Protection</td><td class="val">Overcurrent, overvoltage, dump load</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="testing" id="testing">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Testing &amp; Documentation</span>
+      <h2>Field data and simulation results.</h2>
+      <p>Photos, waveforms, and simulation output land here as testing wraps up ahead of the July 30 public demonstration.</p>
+    </div>
+
+    <h3 class="subsec-title reveal">Site Visit &mdash; WEGEN Prototype, June 18, 2026</h3>
+    <div class="photo-gallery reveal">
+      <figure class="photo-card wide">
+        <img src="assets/photos/site-visit-1.jpg" alt="WEGEN's 10kW VAWT installed on its instrumentation mast against a clear blue sky">
+        <figcaption>WEGEN's 10kW VAWT on its instrumentation mast</figcaption>
+      </figure>
+      <figure class="photo-card">
+        <img src="assets/photos/site-visit-2.jpg" alt="The team reviewing the equipment enclosure at the base of the turbine mast with the WEGEN industry partner">
+        <figcaption>Reviewing the equipment enclosure with WEGEN</figcaption>
+      </figure>
+      <figure class="photo-card">
+        <img src="assets/photos/site-visit-3.jpg" alt="The team walking toward the turbine site along a trail, with the turbine visible in the distance">
+        <figcaption>Approaching the turbine site</figcaption>
+      </figure>
+    </div>
+
+    <h3 class="subsec-title reveal">Finished Single-Line Diagram</h3>
+    <figure class="sld-figure reveal">
+      <img src="assets/diagrams/single-line-diagram.png" alt="Finished single-line diagram of the grid-tie system, from VAWT generator through rectifier, DC bus, dump load protection, inverter, and utility grid connection, with selected key equipment and preliminary dump load settings" onclick="openLightbox(this.src)">
+      <figcaption>Click to enlarge. Key equipment and dump-load settings shown are preliminary and subject to detailed design and testing.</figcaption>
+    </figure>
+
+    <h3 class="subsec-title reveal">Simulation &amp; Testing</h3>
+    <div class="gallery reveal">
+      <div class="gcard"><span class="tag">Coming Soon</span><div class="ic">&#8767;</div><div class="lbl">Oscilloscope waveforms, demo circuit</div></div>
+      <div class="gcard"><span class="tag">Coming Soon</span><div class="ic">&#128202;</div><div class="lbl">Simulation performance output</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg" src="" alt="Enlarged diagram">
+  <button class="lightbox-close" aria-label="Close">&times;</button>
+</div>
+
+<section class="timeline-sec" id="timeline">
+  <div class="wrap">
+    <div class="sec-head on-dark reveal">
+      <span class="eyebrow">Project Timeline</span>
+      <h2>From literature review to public demonstration.</h2>
+    </div>
+    <div class="tl reveal">
+      <div class="tl-item done"><span class="date">Jun 10, 2026</span><h3>Objectives, team roles &amp; preliminary planning established</h3><span class="status">Completed</span></div>
+      <div class="tl-item done"><span class="date">Jun 17, 2026</span><h3>Literature review &amp; grid-tie design alternatives evaluated</h3><span class="status">Completed</span></div>
+      <div class="tl-item done"><span class="date">Jun 18, 2026</span><h3>WEGEN site visit &amp; requirements gathering</h3><span class="status">Completed</span></div>
+      <div class="tl-item done"><span class="date">Jun 22, 2026</span><h3>Preliminary high-level system architecture</h3><span class="status">Completed</span></div>
+      <div class="tl-item done"><span class="date">Jun 30, 2026</span><h3>Refined architecture &amp; component selection</h3><span class="status">Completed</span></div>
+      <div class="tl-item"><span class="date">Jul 14, 2026</span><h3>Prototype components list &amp; cost estimate</h3><span class="status">In Progress</span></div>
+      <div class="tl-item"><span class="date">Jul 25, 2026</span><h3>Final design review &amp; safety compliance review</h3><span class="status">Upcoming</span></div>
+      <div class="tl-item"><span class="date">Jul 30, 2026</span><h3>Public demonstration</h3><span class="status">Upcoming</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="team" id="team">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">Group 15</span>
+      <h2>The team behind the project.</h2>
+    </div>
+    <div class="team-grid reveal">
+      <div class="tcard"><div class="initial">KS</div><h3>Kai Sauvageau</h3><p>Technical Research</p></div>
+      <div class="tcard"><div class="initial">AM</div><h3>Armaan Mamdani</h3><p>Team Organization &amp; Communications</p></div>
+      <div class="tcard"><div class="initial">MN</div><h3>Magnus Ngieng</h3><p>Design Safety Reviewer</p></div>
+      <div class="tcard"><div class="initial">TC</div><h3>Tyler Chicoyne</h3><p>Design Simulation</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h3>Acknowledgments</h3>
+        <p>Thank you to WEGEN for project sponsorship and VAWT prototype access, and to our faculty supervisor, Hong Yang, for guidance throughout the design process.</p>
+      </div>
+      <div>
+        <h3>References</h3>
+        <ul>
+          <li>[1] F. Blaabjerg, M. Liserre, K. Ma, &ldquo;Power electronics converters for wind turbine systems,&rdquo; IEEE Trans. Ind. Appl., vol. 48, no. 2, 2012.</li>
+          <li>[2] D. Shen, A. Izadian, &ldquo;Extremum power seeking control of a hybrid wind-solar-storage DC power system,&rdquo; arXiv:2007.05093, 2020.</li>
+          <li>[3] C. Ram&iacute;rez et al., &ldquo;DC-DC Converters in Wind Systems for Micro-generation: A Systematic Review,&rdquo; Revista de Ingenier&iacute;a, 2014.</li>
+          <li>[4] J. W. Kolar et al., &ldquo;The essence of three-phase AC/AC converter systems,&rdquo; EPE-PEMC 2008.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>Group 15 &middot; ECE 499 &middot; Dept. of Electrical &amp; Computer Engineering &middot; University of Victoria</span>
+      <span>Faculty Supervisor: Hong Yang &middot; Industry Partner: WEGEN</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/model-data.js"></script>
+<script src="assets/js/turbine-viewer.bundle.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    initTurbineViewer('turbine-3d', window.WEGEN_MODEL_B64, {
+      autoRotate: !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    });
+  });
+
+  function openLightbox(src) {
+    document.getElementById('lightboxImg').src = src;
+    document.getElementById('lightbox').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+  const toggle = document.getElementById('navToggle');
+  const links = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => links.classList.toggle('open'));
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => links.classList.remove('open')));
+
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
